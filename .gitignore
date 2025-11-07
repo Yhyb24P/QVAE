@@ -1,0 +1,24 @@
+# 1. 仅忽略根目录的虚拟环境（核心修复）
+/qvae
+/vae
+
+# 2. Python缓存（全局）
+__pycache__/
+*.pyc
+*.pyo
+
+# 3. 数据目录（保留结构但忽略内容）
+data/*
+!data/.gitkeep
+model/*
+!model/.gitkeep
+
+# 4. Wheel包
+*.whl
+
+# 5. IDE和系统文件
+.ipynb_checkpoints/
+.vscode/
+.env
+*:Zone.Identifier
+.DS_Store
