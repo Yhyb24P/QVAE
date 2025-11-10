@@ -32,7 +32,7 @@ if not os.path.isdir(plugin_path):
 # --- Kaiwu 许可初始化  ---
 kw.license.init(user_id="105879747841515522", sdk_code="4vCbDDWqIdUEXDdEHKK0L4MtOOXvMF")
 
-from kaiwu_torch_plugin import QVAE, BoltzmannMachine, RestrictedBoltzmannMachine
+from kaiwu_torch_plugin import QVAE_BM, BoltzmannMachine, RestrictedBoltzmannMachine
 from kaiwu.classical import SimulatedAnnealingOptimizer
 
 # --- 1. 设置与常量  ---
@@ -53,12 +53,12 @@ CHANNELS = 22
 INPUT_DIM = MAX_LEN * CHANNELS
 EXPERIMENT_TAG = f"b{BATCH_SIZE}_ld{LATENT_DIM}_beta{BETA}_bm{LEARNING_RATE_BM}"
 
-# RBM 先验网络结构 
+# BM 先验网络结构 
 prior_vis = LATENT_DIM // 2
-prior_hid = LATENT_DIM - prior_vis
+# prior_hid = LATENT_DIM - prior_vis
 
 # 路径配置 
-QVAE_OUTPUT_ROOT = os.path.join(project_root, "data", "qvae") 
+QVAE_OUTPUT_ROOT = os.path.join(project_root, "data", "qvae_bm") 
 log_save_dir = os.path.join(QVAE_OUTPUT_ROOT, "log")
 model_save_dir = os.path.join(QVAE_OUTPUT_ROOT, "model")
 os.makedirs(log_save_dir, exist_ok=True)
@@ -188,18 +188,18 @@ def plot_losses(train_elbo, valid_elbo, train_cost, valid_cost, train_bm, save_d
 
 def plot_rbm_weights(weights_matrix, save_dir, epoch_str, prefix):
     try:
-        logging.info(f"正在生成 Epoch {epoch_str} 的 RBM 权重热力图...")
+        logging.info(f"正在生成 Epoch {epoch_str} 的 BM 权重热力图...")
         plt.figure(figsize=(10, 8))
         sns.heatmap(weights_matrix, cmap='viridis', annot=False, cbar=True)
-        plt.title(f'RBM Weight Matrix (V-H) - Epoch {epoch_str}\n{prefix}')
+        plt.title(f'BM Weight Matrix (V-H) - Epoch {epoch_str}\n{prefix}')
         plt.xlabel(f'Hidden Nodes ({weights_matrix.shape[1]})')
         plt.ylabel(f'Visible Nodes ({weights_matrix.shape[0]})')
         save_path = os.path.join(save_dir, f"{prefix}_rbm_weights_epoch_{epoch_str}.png")
         plt.savefig(save_path)
         plt.close()
-        logging.info(f"RBM 权重热力图已保存至: {save_path}")
+        logging.info(f"BM 权重热力图已保存至: {save_path}")
     except Exception as e:
-        logging.error(f"绘制 RBM 权重热力图时发生错误: {e}")
+        logging.error(f"绘制 BM 权重热力图时发生错误: {e}")
 
 # --- 5. 主训练函数 ---
 def main():
@@ -258,13 +258,17 @@ def main():
     )
 
     # --- 实例化模型和优化器  ---
-    logging.info(f"初始化 RBM (隐空间先验)... V={prior_vis}, H={prior_hid}")
-    bm_prior = RestrictedBoltzmannMachine(
-        num_visible=prior_vis,
-        num_hidden=prior_hid
+    # logging.info(f"初始化 RBM (隐空间先验)... V={prior_vis}, H={prior_hid}")
+    # bm_prior = RestrictedBoltzmannMachine(
+    #     num_visible=prior_vis,
+    #     num_hidden=prior_hid
+    # ).to(device)
+    logging.info(f"初始化 Full BoltzmannMachine (隐空间先验)... N={LATENT_DIM}")
+    bm_prior = BoltzmannMachine(
+        num_nodes=LATENT_DIM
     ).to(device)
     
-    logging.info("初始化 RBM 采样器 (模拟退火)...")
+    logging.info("初始化 BM 采样器 (模拟退火)...")
     train_sampler = SimulatedAnnealingOptimizer(
         initial_temperature=500.0,
         alpha=0.99,
@@ -275,15 +279,24 @@ def main():
     )
     
     logging.info("初始化 QVAE 模型 (FC 架构)...")
-    model = QVAE(
-        encoder=EncoderFC(INPUT_DIM, LATENT_DIM),
-        decoder=DecoderFC(LATENT_DIM, INPUT_DIM),
-        bm=bm_prior,
-        sampler=train_sampler,
-        dist_beta=1.0, 
-        mean_x=mean_x,
-        num_vis=bm_prior.num_visible
-    ).to(device)
+    # model = QVAE(
+    #     encoder=EncoderFC(INPUT_DIM, LATENT_DIM),
+    #     decoder=DecoderFC(LATENT_DIM, INPUT_DIM),
+    #     bm=bm_prior,
+    #     sampler=train_sampler,
+    #     dist_beta=1.0, 
+    #     mean_x=mean_x,
+    #     num_vis=bm_prior.num_visible
+    # ).to(device)
+    model = QVAE_BM(
+    encoder=EncoderFC(INPUT_DIM, LATENT_DIM),
+    decoder=DecoderFC(LATENT_DIM, INPUT_DIM),
+    bm=bm_prior,
+    sampler=train_sampler,
+    dist_beta=1.0, 
+    mean_x=mean_x,
+    num_vis=prior_vis 
+).to(device)
 
     vae_params = itertools.chain(model.encoder.parameters(), model.decoder.parameters())
     bm_params = model.bm.parameters()
@@ -413,12 +426,12 @@ def main():
         else:
             logging.info("没有足够的训练数据来绘制损失曲线。")
         try:
-            logging.info("正在获取并绘制最终的 RBM 权重...")
+            logging.info("正在获取并绘制最终的 BM 权重...")
             with torch.no_grad():
                 final_weights = model.bm.quadratic_coef.detach().cpu().numpy()
             plot_rbm_weights(final_weights, log_save_dir, "final", file_prefix)
         except Exception as e:
-            logging.error(f"无法绘制最终的 RBM 权重热力图: {e}")
+            logging.error(f"无法绘制最终的 BM 权重热力图: {e}")
 
 
 if __name__ == "__main__":

@@ -149,7 +149,7 @@ print(f'Total sequences remaining after duplicate removal: {len(uniprot_tp)}')
 # --- VAE 和 训练数据 加载 ---
 print("Loading VAE generated sequences...")
 # --- 修改下面这一行 ---
-vae_tp = pd.DataFrame(read_fasta('scripts/qvae-v/data/qvae-fc/b2048_ld32_beta0.1/output/generated_seqs_fc_n5000_T1.0'), columns = ['name','sequence'])
+vae_tp = pd.DataFrame(read_fasta('data/qvae/b2048_ld32_beta0.1/output/generated_seqs_n5000_T1.0'), columns = ['name','sequence'])
 # --- 修改上面这一行 ---
 
 # 可选：清理 VAE 序列
@@ -158,8 +158,6 @@ vae_tp = clean(vae_tp)
 print("Loading training data (X_train)...")
 with open('data/tv_sim_split_train.pkl', 'rb') as f:
     X_train = pickle.load(f)
-# 确保 X_train 也是干净的（如果需要）
-# X_train = clean(X_train) 
 
 # --- 3. 并行计算 Levenshtein 距离 ---
 query_vae_seqs = vae_tp['sequence'].tolist()
@@ -205,7 +203,6 @@ print("Distance calculations complete.")
 
 # --- 4. 绘图 (Optimized) ---
 print("Generating plot...")
-# --- 修复：将 'Sequence' 改为 'sequence' ---
 vae_tp_len = list(vae_tp['sequence'].str.len())
 
 plt.figure(figsize=(9, 6))
@@ -218,7 +215,7 @@ sns.histplot(min_lev, kde=True, label='Distance to training data', stat="density
 sns.histplot(min_lev_h, kde=True, label='Distance to MTSs in UniProt', stat="density", element="step")
 
 plt.legend(fontsize=12)
-save_path = 'data/Edit_Distance_Optimized.png'
+save_path = 'data/analysis/Edit_Distance_Optimized.png'
 plt.savefig(save_path, dpi=400, bbox_inches="tight")
 print(f"Plot saved to {save_path}")
 

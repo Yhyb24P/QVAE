@@ -1,17 +1,10 @@
-# 1. 仅忽略根目录的虚拟环境（核心修复）
-/qvae
-/vae
-
+# 1. 虚拟环境目录
+.qvae/
 # 2. Python缓存（全局）
-__pycache__/
 *.pyc
 *.pyo
 
 # 3. 数据目录（保留结构但忽略内容）
-data/*
-!data/.gitkeep
-model/*
-!model/.gitkeep
 
 # 4. Wheel包
 *.whl

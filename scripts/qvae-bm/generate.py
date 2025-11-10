@@ -24,7 +24,7 @@ if project_root not in sys.path:
 # --- Kaiwu 许可初始化 ---
 import kaiwu as kw
 kw.license.init(user_id="105879747841515522", sdk_code="4vCbDDWqIdUEXDdEHKK0L4MtOOXvMF")
-from kaiwu_torch_plugin import QVAE, BoltzmannMachine, RestrictedBoltzmannMachine
+from kaiwu_torch_plugin import QVAE_BM, BoltzmannMachine, RestrictedBoltzmannMachine
 from kaiwu.classical import SimulatedAnnealingOptimizer
 
 # --- 日志配置 ---
@@ -119,17 +119,22 @@ def main():
         logging.error(f"加载 mean_x 失败: {e}")
         sys.exit(1)
     
-    # --- 初始化 RBM (隐空间先验) ---
-    logging.info("初始化 RBM...")
+    # # --- 初始化 RBM (隐空间先验) ---
+    # logging.info("初始化 RBM...")
+    # vis_units = args.latent_dim // 2
+    # hid_units = args.latent_dim - vis_units
+    # bm = RestrictedBoltzmannMachine(
+    #     num_visible=vis_units,
+    #     num_hidden=hid_units
+    # ).to(device)
+    logging.info("初始化 Full BoltzmannMachine...")
     vis_units = args.latent_dim // 2
-    hid_units = args.latent_dim - vis_units
-    bm = RestrictedBoltzmannMachine(
-        num_visible=vis_units,
-        num_hidden=hid_units
+    bm = BoltzmannMachine(
+        num_nodes=args.latent_dim
     ).to(device)
 
-    # --- 初始化 RBM 采样器 (用于 QVAE) ---
-    logging.info("设置 RBM 采样器 (模拟退火)...")
+    # --- 初始化 BM 采样器 (用于 QVAE) ---
+    logging.info("设置 BM 采样器 (模拟退火)...")
     sampler = SimulatedAnnealingOptimizer(
         initial_temperature=5000.0,
         alpha=0.995,
@@ -140,7 +145,7 @@ def main():
 
     # --- 初始化 QVAE 模型 ---
     logging.info("初始化 QVAE 模型 (FC 架构)...")
-    model = QVAE(
+    model = QVAE_BM(
         encoder=EncoderFC(INPUT_DIM, args.latent_dim),
         decoder=DecoderFC(args.latent_dim, INPUT_DIM),
         bm=bm,
@@ -163,11 +168,11 @@ def main():
         logging.error("这通常是因为模型架构或 QVAE 初始化参数与训练时不匹配。")
         sys.exit(1)
 
-    # --- 3. 从 RBM 先验采样 ---
-    logging.info(f"正在从 RBM 先验分布采样 {args.n_samples} 个隐向量 z ...")
+    # --- 3. 从 BM 先验采样 ---
+    logging.info(f"正在从 BM 先验分布采样 {args.n_samples} 个隐向量 z ...")
     
     all_samples = []
-    pbar = tqdm(total=args.n_samples, desc="Sampling from RBM")
+    pbar = tqdm(total=args.n_samples, desc="Sampling from BM")
     total_collected = 0
     with torch.no_grad():
         while total_collected < args.n_samples:
@@ -244,7 +249,7 @@ def main():
     logging.info(f'序列总数 (去重后): {len(filtered_seq_to_check)}')
 
     # 定义输出路径
-    output_dir = f"data/qvae/b{args.batch_size}_ld{args.latent_dim}_beta{args.beta}/output"
+    output_dir = f"data/qvae_bm/b{args.batch_size}_ld{args.latent_dim}_beta{args.beta}/output"
     os.makedirs(output_dir, exist_ok=True)
     
     output_fasta_path = os.path.join(output_dir, f"generated_seqs_n{args.n_samples}_T{args.temperature}")
