@@ -19,18 +19,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 logging.info(f"Using device: {device}")
 
 # --- 2. 加载数据 ---
-# 注意：假设 'data/' 目录存在。如果不存在，请创建它或修改路径。
-# 为了使脚本可直接运行，我们使用模拟数据。
-# 在您的环境中，请取消注释下一节以加载您的 .pkl 文件。
-
-# --- 模拟数据（如果未找到 .pkl 文件） ---
 def create_mock_data():
     logging.warning("Mock data creation: Simulating pkl files.")
-    # 模拟 'data/tv_sim_split_train.pkl'
     train_sequences = ['FIWLVMYCATHGSQRKNEPD', 'PDENKRSQGHTACMYVLWIF', 'ATHGSQRKNEPDFIWLVMYC'] * 100
     mock_train_df = pd.DataFrame({'sequence': train_sequences})
-    
-    # 模拟 'data/tv_sim_split_valid.pkl'
     valid_sequences = ['FIWLVMYCATHGSQRKNEPD', 'PDENKRSQGHTACMYVLWIF'] * 20
     mock_valid_df = pd.DataFrame({'sequence': valid_sequences})
     
@@ -79,7 +71,7 @@ X_ohe_valid_tensor = torch.FloatTensor(np.array(X_ohe_valid_list)).view(-1, 1540
 logging.info(f"Train tensor shape: {X_ohe_train_tensor.shape}")
 logging.info(f"Valid tensor shape: {X_ohe_valid_tensor.shape}")
 
-# --- 4. 定义模型 (和以前一样) ---
+# --- 4. 定义模型 ---
 class VAE(nn.Module):
     def __init__(self):
         super(VAE, self).__init__()
@@ -108,8 +100,7 @@ class VAE(nn.Module):
         z = self.reparameterize(mu, logvar)
         return self.decode(z), mu, logvar
 
-# --- 修改 loss_function ---
-# 现在返回 (总损失, 重构损失, KL损失)
+# 返回 (总损失, 重构损失, KL损失)
 def loss_function(recon_x, x, mu, logvar):
     BCE = F.binary_cross_entropy(recon_x, x, reduction='sum')
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
@@ -118,7 +109,7 @@ def loss_function(recon_x, x, mu, logvar):
 
 # --- 5. 设置 DataLoader ---
 batch_size = 128
-epochs = 50 # 您可以根据需要调整
+epochs = 50 
 
 train_dataset = TensorDataset(X_ohe_train_tensor)
 valid_dataset = TensorDataset(X_ohe_valid_tensor)
@@ -159,8 +150,6 @@ valid_recon_losses = []
 # 确保 'data/vae/model/' 和 'model/vae/' 目录存在
 import os
 os.makedirs('data/vae/model', exist_ok=True)
-os.makedirs('model/vae', exist_ok=True)
-
 f = open("data/vae/model/loss_w.txt", "a")
 for epoch in range(epochs):
     # --- 训练 ---
@@ -197,7 +186,7 @@ for epoch in range(epochs):
     logging.info(f"Epoch: {epoch}. Train ELBO: {avg_train_elbo}. Train Recon: {avg_train_recon}")
     
     # 保存模型
-    torch.save(model.state_dict(), f"model/vae/vae_self_tv_sim_split_kl_weight_1_batch_size_{batch_size}_epochs{epoch}.chkpt")
+    torch.save(model.state_dict(), f"data/vae/model/vae_self_tv_sim_split_kl_weight_1_batch_size_{batch_size}_epochs{epoch}.chkpt")
 
     # --- 验证 ---
     model.eval() # 设置为评估模式

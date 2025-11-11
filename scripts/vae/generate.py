@@ -60,8 +60,7 @@ class VAE(nn.Module):
 model = VAE() # 实例化 VAE 模型
 
 # --- 加载预训练模型 ---
-# 加载在 train.py 中训练好的模型权重 (epoch 32 被选为最佳模型)
-model_path = "model/vae/vae_self_tv_sim_split_kl_weight_1_batch_size_128_epochs32.chkpt"
+model_path = "data/vae/model/vae_self_tv_sim_split_kl_weight_1_batch_size_128_epochs32.chkpt"
 model.load_state_dict(torch.load(model_path))
 model.eval() # 设置模型为评估模式
 
