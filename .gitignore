@@ -1,10 +1,14 @@
 # 1. 虚拟环境目录
 .qvae/
+.unirep/
 # 2. Python缓存（全局）
 *.pyc
 *.pyo
 
-# 3. 数据目录（保留结构但忽略内容）
+# 3. 数据目录（仅忽略大文件）
+data/*.npz
+data/*.fas
+*.pkl
 
 # 4. Wheel包
 *.whl

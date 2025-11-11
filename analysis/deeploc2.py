@@ -74,7 +74,7 @@ plt.title('Mitochondrion Probability Distribution (VAE vs. QBM-VAE)', fontsize=1
 plt.xlabel('Predicted Mitochondrion Probability (DeepLoc 2.0)', fontsize=12)
 plt.ylabel('Count', fontsize=12)
 plt.legend()
-plt.savefig('data/comparison_DeepLoc_prob_distribution_VAE_vs_QVAE.png', dpi=400, bbox_inches="tight")
+plt.savefig('data/analysis/comparison_DeepLoc_prob_distribution_VAE_vs_QVAE.png', dpi=400, bbox_inches="tight")
 print("已保存概率分布对比图。")
 
 
@@ -104,5 +104,5 @@ plt.title('Predicted Localization Distribution (VAE vs. QBM-VAE)', fontsize=16)
 plt.xlabel('Localization', fontsize=12)
 plt.ylabel('Count', fontsize=12)
 plt.legend(title='Model')
-plt.savefig('data/comparison_DeepLoc_localization_distribution_VAE_vs_QVAE.png', dpi=400, bbox_inches="tight")
+plt.savefig('data/analysis/comparison_DeepLoc_localization_distribution_VAE_vs_QVAE.png', dpi=400, bbox_inches="tight")
 print("已保存定位分布对比图。")
