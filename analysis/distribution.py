@@ -6,9 +6,9 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from collections import Counter
 
-with open('MTS/data/tv_sim_split_train.pkl', 'rb') as f:
+with open('data/tv_sim_split_train.pkl', 'rb') as f:
     X_train = pickle.load(f)
-with open('MTS/data/tv_sim_split_valid.pkl', 'rb') as f:
+with open('data/tv_sim_split_valid.pkl', 'rb') as f:
     X_valid = pickle.load(f)
 
 final_df = pd.concat([X_train, X_valid], ignore_index=True).reset_index(drop=True)
@@ -22,14 +22,14 @@ plt.figure(figsize=(9, 6))
 plt.xlabel('Length (in AA)', fontsize=12)
 plt.ylabel('Density',fontsize=12)
 
-#sns.distplot(mtss_len, hist=True, kde=True, rug=False, label = 'Curated MTS Dataset')
-sns.distplot(list(X_train['length']), hist=True, kde=True, rug=False, label = 'Train')
-sns.distplot(list(X_valid['length']), hist=True, kde=True, rug=False, label = 'Valid')
+#sns.histplot(mtss_len, hist=True, kde=True, rug=False, label = 'Curated MTS Dataset')
+sns.histplot(list(X_train['length']), kde=True, label = 'Train')
+sns.histplot(list(X_valid['length']), kde=True, label = 'Valid')
 plt.legend(fontsize=12)
-plt.savefig('MTS/data/Curated_MTS_dataset_stratified_split.png', dpi=400, bbox_inches = "tight")
+plt.savefig('data/analysis/Curated_MTS_dataset_stratified_split.png', dpi=400, bbox_inches = "tight")
 plt.clf()
 
-uniprot = pd.read_excel('MTS/data/uniprot_transit_peptide.xlsx', header = None) 
+uniprot = pd.read_excel('data/uniprot_transit_peptide.xlsx', header = None) 
 uniprot_tp = []
 for i in range(1,np.shape(uniprot)[0]):
     
@@ -56,7 +56,7 @@ overlap = set1.intersection(set2)
 print(len(overlap))
 
 uniprot_len = list(uniprot_tp['sequence'].str.len())
-sns.distplot(uniprot_len, hist=True, kde=True, rug=False, label = 'UniProt (unfiltered)')
+sns.histplot(uniprot_len, hist=True, kde=True, rug=False, label = 'UniProt (unfiltered)')
 '''
 
 # Count occurrences of each species
@@ -73,6 +73,6 @@ sns.set_palette("pastel")
 
 plt.pie(filtered_species_counts.values(), labels=filtered_species_counts.keys(), autopct='%1.1f%%', startangle=90, textprops={'fontsize': 8}, pctdistance=0.8)
 plt.axis('equal')
-plt.savefig('MTS/data/UniProt_Species_proportion.png', dpi=400, bbox_inches = "tight")
+plt.savefig('data/analysis/UniProt_Species_proportion.png', dpi=400, bbox_inches = "tight")
 
 

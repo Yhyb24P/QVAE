@@ -1,4 +1,3 @@
-
 import numpy as np
 import pandas as pd
 import re
@@ -81,61 +80,59 @@ def lowercase_sample(name):
         return name.lower()
     return name
 
+def read_s4pred_fasta(filepath):
+    """辅助函数：解析 s4pred 的3行 .fas 文件"""
+    data = {"Name": [], "Sequence": [], "Structure": []}
+    try:
+        with open(filepath, "r") as file:
+            lines = file.readlines()
+
+        for i in range(0, len(lines), 3):
+            if i + 2 >= len(lines):
+                print(f"  警告: s4pred 文件 {filepath} 在第 {i} 行处记录不完整。")
+                continue
+                
+            protein_name = lines[i].strip()[1:]
+            protein_sequence = lines[i + 1].strip()
+            protein_structure = lines[i + 2].strip()
+
+            data["Name"].append(protein_name)
+            data["Sequence"].append(protein_sequence)
+            data["Structure"].append(protein_structure)
+    
+    except Exception as e:
+        print(f"  读取 s4pred 文件 {filepath} 时出错: {e}")
+        return pd.DataFrame(data) # 返回空/部分数据
+        
+    return pd.DataFrame(data)
+
+
 # --- 2. Data Loading ---
 
 # --- 数据集 1 (AMTS(QVAE)) ---
-amts_df = pd.DataFrame(read_fasta('scripts/qvae-v/data/qvae-fc/b2048_ld32_beta0.1/output/generated_seqs_fc_n5000_T1.0'), columns = ['Name','Sequence'])
-amts_df['Label'] = 'AMTS(QVAE)'
+# QVAE 序列文件
+qvae_seq_path = 'data/qvae/b2048_ld32_beta0.1/output/generated_seqs_n5000_T1.0'
+amts_df = pd.DataFrame(read_fasta(qvae_seq_path), columns = ['Name','Sequence'])
+amts_df['Label'] = 'AMTS(QVAE)' 
 
 # --- 数据集 2 (AMTS(VAE)) ---
-print("Loading VAE data from FASTA: data/vae/output/amts.fasta")
-try:
-    mts_df = pd.DataFrame(read_fasta('data/vae/output/amts'), columns = ['Name','Sequence'])
-    
-    if mts_df.empty:
-        print("错误: 'data/vae/output/amts.fasta' 未找到或为空。将跳过此数据集。")
-        mts_df = pd.DataFrame(columns=['Name', 'Sequence', 'Label'])
-    else:
-        mts_df['Label'] = 'AMTS(VAE)'
-except FileNotFoundError:
-    print("错误: 'data/vae/output/amts.fasta' 未找到。将跳过此数据集。")
-    mts_df = pd.DataFrame(columns=['Name', 'Sequence', 'Label'])
-except Exception as e:
-    print(f"加载 'data/vae/output/amts.fasta' 时出错: {e}")
-    mts_df = pd.DataFrame(columns=['Name', 'Sequence', 'Label'])
+# VAE 序列文件
+vae_seq_path = 'data/vae/output/amts'
+print(f"Loading VAE data from FASTA: {vae_seq_path}.fasta") 
+mts_df = pd.DataFrame(read_fasta(vae_seq_path), columns = ['Name','Sequence'])
+mts_df['Label'] = 'AMTS(VAE)'
 
-
-
-# --- 数据集 3  ---
+# --- 数据集 3 (Train Data) ---
+# 训练集 序列文件
 new_data_name = 'data/mts_train'    
 new_data_label = 'train_data'        
-
+original_df = pd.DataFrame(read_fasta(new_data_name), columns = ['Name','Sequence'])
 print(f"Loading NEW data from FASTA: {new_data_name}.fasta")
-try:
-    # 2. 加载方式：从 read_fasta 加载
-    original_df = pd.DataFrame(read_fasta(new_data_name), columns = ['Name','Sequence'])
-    
-    if original_df.empty:
-        print(f"警告: '{new_data_name}.fasta' 未找到或为空。将跳过这个新的数据集。")
-    else:
-        # 3. 确保列名一致
-        original_df['Label'] = new_data_label
-
-except Exception as e:
-    print(f"加载 '{new_data_name}.fasta' 时出错: {e}")
-    original_df = pd.DataFrame(columns=['Name', 'Sequence', 'Label'])
-
-
-
+original_df['Label'] = new_data_label
 
 # --- 合并所有数据集 ---
 df_list = [amts_df, mts_df, original_df]
 df = pd.concat([d for d in df_list if not d.empty], ignore_index=True).reset_index(drop = True)
-
-# 如果 df 为空，则退出
-if df.empty:
-    print("错误：没有成功加载任何数据。退出脚本。")
-    sys.exit()
 
 # --- 3. Biopython Property Calculation (Optimized) ---
 
@@ -158,7 +155,7 @@ amino_acid_columns = sorted([col for col in aa_fraction_df.columns if col in all
 df = pd.concat([df, aa_fraction_df[amino_acid_columns]], axis=1)
 
 
-# 计算长度 (这已经是最高效的方式)
+# 计算长度
 df['Length'] = df['Sequence'].apply(len)
 
 # --- 4. Plotting Setup ---
@@ -192,7 +189,7 @@ for label in labels:
 plt.xlabel('Net Charge')
 plt.ylabel('Density') # Y 轴现在是 'Density' (密度)
 plt.legend()
-plt.savefig('data/diversity_net_charge_biopython_3way.png', dpi = 400, bbox_inches = "tight")
+plt.savefig('data/analysis/diversity_net_charge_biopython_3way.png', dpi = 400, bbox_inches = "tight")
 plt.clf()
 
 # Amino acid composition (为支持3个数据集)
@@ -229,7 +226,7 @@ plt.xlabel('Amino Acids')
 plt.ylabel('Fraction')
 plt.grid(visible=False, axis='both')
 plt.legend(handles=legend_elements)
-plt.savefig('data/diversity_aa_fraction_biopython_3way.png', dpi = 400, bbox_inches = "tight")
+plt.savefig('data/analysis/diversity_aa_fraction_biopython_3way.png', dpi = 400, bbox_inches = "tight")
 plt.clf()
 
 # GRAVY
@@ -244,7 +241,7 @@ for label in labels:
 plt.xlabel('GRAVY')
 plt.ylabel('Density')
 plt.legend()
-plt.savefig('data/diversity_gravy_biopython_3way.png', dpi = 400, bbox_inches = "tight")
+plt.savefig('data/analysis/diversity_gravy_biopython_3way.png', dpi = 400, bbox_inches = "tight")
 plt.clf()
 
 # Eisenberg hydrophobicity
@@ -259,7 +256,7 @@ for label in labels:
 plt.xlabel('Eisenberg hydrophobicity')
 plt.ylabel('Density')
 plt.legend()
-plt.savefig('data/diversity_Eisenberg_hydrophobicity_biopython_3way.png', dpi = 400, bbox_inches = "tight")
+plt.savefig('data/analysis/diversity_Eisenberg_hydrophobicity_biopython_3way.png', dpi = 400, bbox_inches = "tight")
 plt.clf()
 
 # Length
@@ -274,60 +271,69 @@ for l in labels:
 plt.xlabel('Length')
 plt.ylabel('Density') # Y 轴是 'Density'
 plt.legend()
-plt.savefig('data/diversity_Length_3way.png', dpi = 400, bbox_inches = "tight")
+plt.savefig('data/analysis/diversity_Length_3way.png', dpi = 400, bbox_inches = "tight")
 plt.clf()
 
 # --- 6. s4pred secondary structure ---
 print("Calculating Secondary Structure properties (s4pred)...")
-s4pred_filepath = "data/diversity_cluster_ss.fas"
-data = {"Name": [], "Sequence": [], "Structure": []}
 
-if not os.path.exists(s4pred_filepath):
-    print(f"警告: s4pred 文件未找到: {s4pred_filepath}。将跳过二级结构分析。")
+# 路径基于第 2 节中加载序列文件
+s4pred_files_to_load = {
+    'AMTS(QVAE)': 'data/diversity_cluster_ss.fas',
+    'AMTS(VAE)': 'data/diversity_cluster_ss.fas', 
+    'train_data': 'data/diversity_cluster_ss.fas'
+}
+all_s4pred_dfs = []
+# 仅加载已加载数据集的 SS 文件
+for label in labels: 
+    if label not in s4pred_files_to_load:
+        print(f"警告: 标签 '{label}' 没有定义的 s4pred SS 文件路径。")
+        continue
+    
+    filepath = s4pred_files_to_load[label]
+    
+    if not os.path.exists(filepath):
+        print(f"警告: s4pred 文件未找到: {filepath}。将跳过 '{label}' 的二级结构分析。")
+        continue
+    
+    print(f"Loading SS data for '{label}' from: {filepath}")
+    ss_df = read_s4pred_fasta(filepath)
+    if not ss_df.empty:
+        all_s4pred_dfs.append(ss_df)
+    else:
+        print(f"  警告: {filepath} 为空或读取失败。")
+
+if not all_s4pred_dfs:
+    print("警告: 未能加载任何 s4pred SS 数据。跳过二级结构分析。")
     combined_df = df.copy() # 复制df以保持流程
     combined_df['Coil'] = np.nan
     combined_df['Helix'] = np.nan
     combined_df['Strand'] = np.nan
 else:
-    try:
-        with open(s4pred_filepath, "r") as file:
-            lines = file.readlines()
+    # 成功加载了至少一个 SS 文件
+    s4pred_df = pd.concat(all_s4pred_dfs, ignore_index=True)
+    
+    # 应用名称标准化 (与主 df 相同)
+    s4pred_df['Name'] = s4pred_df['Name'].apply(lowercase_sample)
+    df['Name'] = df['Name'].apply(lowercase_sample)
 
-        for i in range(0, len(lines), 3):
-            if i + 2 >= len(lines): # 检查记录是否完整
-                print(f"警告: s4pred 文件在第 {i} 行处记录不完整。")
-                continue
-                
-            protein_name = lines[i].strip()[1:]
-            protein_sequence = lines[i + 1].strip()
-            protein_structure = lines[i + 2].strip()
+    # 合并
+    combined_df = df.merge(s4pred_df[['Name', 'Structure']], on='Name', how='left')
 
-            data["Name"].append(protein_name)
-            data["Sequence"].append(protein_sequence)
-            data["Structure"].append(protein_structure)
-
-        s4pred_df = pd.DataFrame(data)
-        
-        # 应用名称标准化
-        s4pred_df['Name'] = s4pred_df['Name'].apply(lowercase_sample)
-        # 也对主df应用
-        df['Name'] = df['Name'].apply(lowercase_sample)
-
-        # 合并
-        combined_df = df.merge(s4pred_df[['Name', 'Structure']], on='Name', how='left')
-
+    # 检查合并是否成功 (即，是否有任何非 NaN 的 Structure)
+    if combined_df['Structure'].isnull().all():
+        print("警告: s4pred 数据已加载，但没有一个 'Name' 成功匹配主数据集。")
+        print("  请检查 .fas 文件中的序列名称是否与 .fasta 文件中的序列名称一致。")
+        combined_df['Coil'] = np.nan
+        combined_df['Helix'] = np.nan
+        combined_df['Strand'] = np.nan
+    else:
+        # 计算 SS 属性
         ss_props_df = combined_df['Structure'].apply(calculate_secondary_structure_percentages).apply(pd.Series)
         ss_props_df.columns = ['Coil', 'Helix', 'Strand']
 
         combined_df = combined_df.drop(columns=['Coil', 'Helix', 'Strand'], errors='ignore')
         combined_df = pd.concat([combined_df, ss_props_df], axis=1)
-    
-    except Exception as e:
-        print(f"处理 s4pred 文件时出错: {e}。跳过二级结构分析。")
-        combined_df = df.copy()
-        combined_df['Coil'] = np.nan
-        combined_df['Helix'] = np.nan
-        combined_df['Strand'] = np.nan
 
 
 # --- 绘制二级结构图 (为支持3个数据集) ---
@@ -348,7 +354,8 @@ for i, label in enumerate(label_list):
     
     data_to_plot = combined_df[combined_df['Label'] == label].dropna(subset=ss_columns)
     if data_to_plot.empty:
-        print(f"警告: 标签 '{label}' 没有有效的二级结构数据。")
+        # 即使文件加载了，也可能因为名称不匹配而没有数据
+        print(f"警告: 标签 '{label}' 没有有效的二级结构数据用于绘图。")
         continue
 
     # 计算位移
@@ -372,7 +379,7 @@ plt.grid(visible=False, axis='both')
 if legend_elements: # 仅当有图例时才显示
     plt.legend(handles=legend_elements)
 
-plt.savefig('data/diversity_ss_fraction_s4pred_3way.png', dpi = 400, bbox_inches = "tight")
+plt.savefig('data/analysis/diversity_ss_fraction_s4pred_3way.png', dpi = 400, bbox_inches = "tight")
 plt.clf()
 
 print("--- 脚本执行完毕 ---")

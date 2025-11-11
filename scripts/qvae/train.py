@@ -41,7 +41,7 @@ mpl.use('Agg')
 logging.info(f"使用设备: {device}")
 
 # --- 关键超参数  ---
-BETA = 0.01        
+BETA = 0.1        
 LATENT_DIM = 32
 BATCH_SIZE = 2048
 LEARNING_RATE_VAE = 1e-4

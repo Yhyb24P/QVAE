@@ -1,0 +1,144 @@
+2025-11-11 08:06:19,157 - INFO - --- QVAE 训练和评估开始 (FC 架构) ---
+2025-11-11 08:06:19,158 - INFO - 使用设备: cuda
+2025-11-11 08:06:19,158 - INFO - BETA = 0.1, LATENT_DIM = 32, BATCH_SIZE = 2048
+2025-11-11 08:06:19,158 - INFO - 正在加载数据: /home/yhshy/git_files/QVAE/data/tv_sim_split_train.pkl...
+2025-11-11 08:06:19,172 - INFO - 成功加载 50980 条序列。
+2025-11-11 08:06:19,172 - INFO - 正在加载数据: /home/yhshy/git_files/QVAE/data/tv_sim_split_valid.pkl...
+2025-11-11 08:06:19,174 - INFO - 成功加载 5680 条序列。
+2025-11-11 08:06:19,174 - INFO - 计算训练数据均值 (mean_x)...
+2025-11-11 08:06:19,762 - INFO - 计算得到的 mean_x: 0.045454545454545456
+2025-11-11 08:06:19,762 - INFO - 已将 mean_x 保存到: /home/yhshy/git_files/QVAE/data/qvae_bm/model/mean_x_b2048_ld32_beta0.1_bm0.0001.pkl
+2025-11-11 08:06:19,762 - INFO - 训练集大小: 50980, 验证集大小: 5680
+2025-11-11 08:06:19,763 - INFO - 初始化 Full BoltzmannMachine (隐空间先验)... N=32
+2025-11-11 08:06:19,777 - INFO - 初始化 BM 采样器 (模拟退火)...
+2025-11-11 08:06:19,777 - INFO - 初始化 QVAE 模型 (FC 架构)...
+2025-11-11 08:06:20,557 - INFO - --- 开始训练: 50 个 Epochs, β=0.1 (ELBO KL 权重) ---
+2025-11-11 08:06:44,547 - INFO - Epoch 1 [训练] | ELBO: 276.3026 | Cost: 278.4301 | KL: -21.2755 | BM Loss: 0.1254
+2025-11-11 08:06:46,032 - INFO - Epoch 1 [验证] | ELBO: 267.6431 | Cost: 269.6368 | KL: -19.9366
+2025-11-11 08:06:46,056 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 267.6431) 
+2025-11-11 08:07:07,920 - INFO - Epoch 2 [训练] | ELBO: 258.3510 | Cost: 260.1560 | KL: -18.0497 | BM Loss: -0.6064
+2025-11-11 08:07:09,416 - INFO - Epoch 2 [验证] | ELBO: 248.7687 | Cost: 250.4162 | KL: -16.4753
+2025-11-11 08:07:09,427 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 248.7687) 
+2025-11-11 08:07:32,996 - INFO - Epoch 3 [训练] | ELBO: 237.4516 | Cost: 239.0831 | KL: -16.3146 | BM Loss: -2.1974
+2025-11-11 08:07:34,598 - INFO - Epoch 3 [验证] | ELBO: 226.8924 | Cost: 228.5607 | KL: -16.6829
+2025-11-11 08:07:34,611 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 226.8924) 
+2025-11-11 08:07:58,608 - INFO - Epoch 4 [训练] | ELBO: 214.3093 | Cost: 216.1102 | KL: -18.0090 | BM Loss: -4.2803
+2025-11-11 08:08:00,177 - INFO - Epoch 4 [验证] | ELBO: 204.0173 | Cost: 205.9958 | KL: -19.7846
+2025-11-11 08:08:00,190 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 204.0173) 
+2025-11-11 08:08:28,173 - INFO - Epoch 5 [训练] | ELBO: 191.2600 | Cost: 193.4420 | KL: -21.8196 | BM Loss: -6.2090
+2025-11-11 08:08:30,304 - INFO - Epoch 5 [验证] | ELBO: 182.8950 | Cost: 185.2674 | KL: -23.7237
+2025-11-11 08:08:30,318 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 182.8950) 
+2025-11-11 08:09:04,671 - INFO - Epoch 6 [训练] | ELBO: 171.9887 | Cost: 174.5955 | KL: -26.0678 | BM Loss: -8.5129
+2025-11-11 08:09:06,763 - INFO - Epoch 6 [验证] | ELBO: 167.8175 | Cost: 170.7027 | KL: -28.8511
+2025-11-11 08:09:06,776 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 167.8175) 
+2025-11-11 08:09:39,680 - INFO - Epoch 7 [训练] | ELBO: 160.3163 | Cost: 163.4708 | KL: -31.5449 | BM Loss: -10.1405
+2025-11-11 08:09:41,629 - INFO - Epoch 7 [验证] | ELBO: 160.6660 | Cost: 164.1605 | KL: -34.9451
+2025-11-11 08:09:41,640 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 160.6660) 
+2025-11-11 08:10:08,350 - INFO - Epoch 8 [训练] | ELBO: 155.1638 | Cost: 158.9804 | KL: -38.1659 | BM Loss: -9.9076
+2025-11-11 08:10:10,107 - INFO - Epoch 8 [验证] | ELBO: 157.6083 | Cost: 161.7417 | KL: -41.3331
+2025-11-11 08:10:10,118 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 157.6083) 
+2025-11-11 08:10:36,185 - INFO - Epoch 9 [训练] | ELBO: 152.9809 | Cost: 157.2979 | KL: -43.1701 | BM Loss: -8.8791
+2025-11-11 08:10:37,874 - INFO - Epoch 9 [验证] | ELBO: 156.3419 | Cost: 160.8601 | KL: -45.1820
+2025-11-11 08:10:37,885 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 156.3419) 
+2025-11-11 08:11:03,679 - INFO - Epoch 10 [训练] | ELBO: 151.7303 | Cost: 156.4025 | KL: -46.7218 | BM Loss: -7.2418
+2025-11-11 08:11:05,380 - INFO - Epoch 10 [验证] | ELBO: 155.1619 | Cost: 159.9373 | KL: -47.7534
+2025-11-11 08:11:05,392 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 155.1619) 
+2025-11-11 08:11:32,997 - INFO - Epoch 11 [训练] | ELBO: 150.7446 | Cost: 155.5852 | KL: -48.4058 | BM Loss: -5.1624
+2025-11-11 08:11:34,921 - INFO - Epoch 11 [验证] | ELBO: 154.1178 | Cost: 159.0546 | KL: -49.3673
+2025-11-11 08:11:34,937 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 154.1178) 
+2025-11-11 08:12:02,417 - INFO - Epoch 12 [训练] | ELBO: 149.6480 | Cost: 154.5751 | KL: -49.2710 | BM Loss: -3.5145
+2025-11-11 08:12:04,157 - INFO - Epoch 12 [验证] | ELBO: 153.2883 | Cost: 158.2745 | KL: -49.8614
+2025-11-11 08:12:04,170 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 153.2883) 
+2025-11-11 08:12:32,355 - INFO - Epoch 13 [训练] | ELBO: 148.7541 | Cost: 153.6881 | KL: -49.3399 | BM Loss: -3.3595
+2025-11-11 08:12:34,655 - INFO - Epoch 13 [验证] | ELBO: 152.4181 | Cost: 157.3751 | KL: -49.5699
+2025-11-11 08:12:34,669 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 152.4181) 
+2025-11-11 08:13:02,179 - INFO - Epoch 14 [训练] | ELBO: 147.9559 | Cost: 152.9724 | KL: -50.1654 | BM Loss: -3.1557
+2025-11-11 08:13:03,933 - INFO - Epoch 14 [验证] | ELBO: 151.5452 | Cost: 156.5572 | KL: -50.1204
+2025-11-11 08:13:03,948 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 151.5452) 
+2025-11-11 08:13:31,975 - INFO - Epoch 15 [训练] | ELBO: 147.3049 | Cost: 152.4164 | KL: -51.1147 | BM Loss: -3.2204
+2025-11-11 08:13:33,960 - INFO - Epoch 15 [验证] | ELBO: 150.9987 | Cost: 156.1011 | KL: -51.0236
+2025-11-11 08:13:33,975 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 150.9987) 
+2025-11-11 08:14:01,727 - INFO - Epoch 16 [训练] | ELBO: 146.8670 | Cost: 152.0097 | KL: -51.4276 | BM Loss: -4.4461
+2025-11-11 08:14:03,526 - INFO - Epoch 16 [验证] | ELBO: 150.6439 | Cost: 155.7572 | KL: -51.1327
+2025-11-11 08:14:03,541 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 150.6439) 
+2025-11-11 08:14:35,433 - INFO - Epoch 17 [训练] | ELBO: 146.4877 | Cost: 151.7100 | KL: -52.2235 | BM Loss: -5.4800
+2025-11-11 08:14:37,724 - INFO - Epoch 17 [验证] | ELBO: 150.3053 | Cost: 155.5036 | KL: -51.9831
+2025-11-11 08:14:37,738 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 150.3053) 
+2025-11-11 08:15:07,132 - INFO - Epoch 18 [训练] | ELBO: 146.0722 | Cost: 151.4757 | KL: -54.0344 | BM Loss: -5.8172
+2025-11-11 08:15:08,988 - INFO - Epoch 18 [验证] | ELBO: 149.8394 | Cost: 155.4938 | KL: -56.5438
+2025-11-11 08:15:09,002 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 149.8394) 
+2025-11-11 08:15:39,232 - INFO - Epoch 19 [训练] | ELBO: 145.6681 | Cost: 151.2660 | KL: -55.9795 | BM Loss: -6.3159
+2025-11-11 08:15:41,158 - INFO - Epoch 19 [验证] | ELBO: 149.4915 | Cost: 155.1495 | KL: -56.5803
+2025-11-11 08:15:41,171 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 149.4915) 
+2025-11-11 08:16:06,868 - INFO - Epoch 20 [训练] | ELBO: 145.4390 | Cost: 151.1576 | KL: -57.1862 | BM Loss: -7.5412
+2025-11-11 08:16:08,559 - INFO - Epoch 20 [验证] | ELBO: 149.2368 | Cost: 155.0023 | KL: -57.6547
+2025-11-11 08:16:08,573 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 149.2368) 
+2025-11-11 08:16:36,953 - INFO - Epoch 21 [训练] | ELBO: 145.1568 | Cost: 150.9974 | KL: -58.4060 | BM Loss: -9.2681
+2025-11-11 08:16:38,940 - INFO - Epoch 21 [验证] | ELBO: 148.8611 | Cost: 154.7944 | KL: -59.3333
+2025-11-11 08:16:38,958 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 148.8611) 
+2025-11-11 08:17:05,257 - INFO - Epoch 22 [训练] | ELBO: 144.7429 | Cost: 150.8740 | KL: -61.3109 | BM Loss: -9.3351
+2025-11-11 08:17:06,966 - INFO - Epoch 22 [验证] | ELBO: 148.5881 | Cost: 154.6937 | KL: -61.0560
+2025-11-11 08:17:06,979 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 148.5881) 
+2025-11-11 08:17:36,044 - INFO - Epoch 23 [训练] | ELBO: 144.5388 | Cost: 150.7996 | KL: -62.6088 | BM Loss: -11.3536
+2025-11-11 08:17:38,225 - INFO - Epoch 23 [验证] | ELBO: 148.2094 | Cost: 154.7067 | KL: -64.9732
+2025-11-11 08:17:38,239 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 148.2094) 
+2025-11-11 08:18:04,308 - INFO - Epoch 24 [训练] | ELBO: 143.9663 | Cost: 150.6714 | KL: -67.0515 | BM Loss: -10.3394
+2025-11-11 08:18:05,983 - INFO - Epoch 24 [验证] | ELBO: 147.8404 | Cost: 154.5208 | KL: -66.8032
+2025-11-11 08:18:05,997 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 147.8404) 
+2025-11-11 08:18:40,511 - INFO - Epoch 25 [训练] | ELBO: 143.7051 | Cost: 150.5329 | KL: -68.2784 | BM Loss: -12.5012
+2025-11-11 08:18:42,522 - INFO - Epoch 25 [验证] | ELBO: 147.4757 | Cost: 154.5076 | KL: -70.3193
+2025-11-11 08:18:42,535 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 147.4757) 
+2025-11-11 08:19:09,041 - INFO - Epoch 26 [训练] | ELBO: 143.2047 | Cost: 150.4202 | KL: -72.1551 | BM Loss: -12.2266
+2025-11-11 08:19:10,692 - INFO - Epoch 26 [验证] | ELBO: 147.1188 | Cost: 154.3451 | KL: -72.2630
+2025-11-11 08:19:10,704 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 147.1188) 
+2025-11-11 08:19:45,429 - INFO - Epoch 27 [训练] | ELBO: 142.9447 | Cost: 150.4241 | KL: -74.7938 | BM Loss: -13.1280
+2025-11-11 08:19:47,343 - INFO - Epoch 27 [验证] | ELBO: 146.7020 | Cost: 154.2896 | KL: -75.8756
+2025-11-11 08:19:47,355 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 146.7020) 
+2025-11-11 08:20:14,116 - INFO - Epoch 28 [训练] | ELBO: 142.5203 | Cost: 150.3048 | KL: -77.8448 | BM Loss: -13.9214
+2025-11-11 08:20:15,921 - INFO - Epoch 28 [验证] | ELBO: 146.3751 | Cost: 154.1361 | KL: -77.6101
+2025-11-11 08:20:15,933 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 146.3751) 
+2025-11-11 08:20:51,516 - INFO - Epoch 29 [训练] | ELBO: 142.1141 | Cost: 150.2310 | KL: -81.1690 | BM Loss: -14.2060
+2025-11-11 08:20:53,469 - INFO - Epoch 29 [验证] | ELBO: 145.7111 | Cost: 153.8890 | KL: -81.7787
+2025-11-11 08:20:53,481 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 145.7111) 
+2025-11-11 08:21:21,016 - INFO - Epoch 30 [训练] | ELBO: 141.7310 | Cost: 150.1961 | KL: -84.6514 | BM Loss: -14.5649
+2025-11-11 08:21:23,148 - INFO - Epoch 30 [验证] | ELBO: 145.4935 | Cost: 153.9874 | KL: -84.9390
+2025-11-11 08:21:23,161 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 145.4935) 
+2025-11-11 08:21:57,452 - INFO - Epoch 31 [训练] | ELBO: 141.4076 | Cost: 150.0671 | KL: -86.5946 | BM Loss: -16.5900
+2025-11-11 08:21:59,064 - INFO - Epoch 31 [验证] | ELBO: 145.2672 | Cost: 153.8968 | KL: -86.2959
+2025-11-11 08:21:59,077 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 145.2672) 
+2025-11-11 08:22:26,977 - INFO - Epoch 32 [训练] | ELBO: 141.2368 | Cost: 149.9783 | KL: -87.4148 | BM Loss: -20.0351
+2025-11-11 08:22:28,976 - INFO - Epoch 32 [验证] | ELBO: 145.1132 | Cost: 153.9018 | KL: -87.8864
+2025-11-11 08:22:28,988 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 145.1132) 
+2025-11-11 08:23:03,105 - INFO - Epoch 33 [训练] | ELBO: 140.8011 | Cost: 149.9553 | KL: -91.5416 | BM Loss: -20.1719
+2025-11-11 08:23:04,983 - INFO - Epoch 33 [验证] | ELBO: 144.4633 | Cost: 153.9002 | KL: -94.3689
+2025-11-11 08:23:04,995 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 144.4633) 
+2025-11-11 08:23:33,516 - INFO - Epoch 34 [训练] | ELBO: 140.1782 | Cost: 149.8756 | KL: -96.9740 | BM Loss: -19.0787
+2025-11-11 08:23:38,795 - INFO - Epoch 34 [验证] | ELBO: 143.9905 | Cost: 153.8018 | KL: -98.1124
+2025-11-11 08:23:38,814 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 143.9905) 
+2025-11-11 08:24:06,566 - INFO - Epoch 35 [训练] | ELBO: 139.7762 | Cost: 149.8087 | KL: -100.3252 | BM Loss: -20.1133
+2025-11-11 08:24:08,394 - INFO - Epoch 35 [验证] | ELBO: 143.7762 | Cost: 153.7449 | KL: -99.6864
+2025-11-11 08:24:08,404 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 143.7762) 
+2025-11-11 08:24:41,960 - INFO - Epoch 36 [训练] | ELBO: 139.4307 | Cost: 149.7482 | KL: -103.1746 | BM Loss: -21.4979
+2025-11-11 08:24:44,375 - INFO - Epoch 36 [验证] | ELBO: 143.1583 | Cost: 153.4670 | KL: -103.0868
+2025-11-11 08:24:44,387 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 143.1583) 
+2025-11-11 08:25:11,846 - INFO - Epoch 37 [训练] | ELBO: 139.0609 | Cost: 149.6712 | KL: -106.1030 | BM Loss: -22.5374
+2025-11-11 08:25:13,722 - INFO - Epoch 37 [验证] | ELBO: 142.8268 | Cost: 153.6172 | KL: -107.9040
+2025-11-11 08:25:13,735 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 142.8268) 
+2025-11-11 08:25:46,844 - INFO - Epoch 38 [训练] | ELBO: 138.6294 | Cost: 149.6045 | KL: -109.7515 | BM Loss: -23.8133
+2025-11-11 08:25:49,295 - INFO - Epoch 38 [验证] | ELBO: 142.5547 | Cost: 153.6048 | KL: -110.5007
+2025-11-11 08:25:49,308 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 142.5547) 
+2025-11-11 08:26:15,191 - INFO - Epoch 39 [训练] | ELBO: 138.2994 | Cost: 149.5679 | KL: -112.6850 | BM Loss: -25.1977
+2025-11-11 08:26:17,194 - INFO - Epoch 39 [验证] | ELBO: 142.0452 | Cost: 153.2163 | KL: -111.7117
+2025-11-11 08:26:17,205 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 142.0452) 
+2025-11-11 08:26:50,706 - INFO - Epoch 40 [训练] | ELBO: 137.6697 | Cost: 149.5065 | KL: -118.3687 | BM Loss: -23.9567
+2025-11-11 08:26:52,535 - INFO - Epoch 40 [验证] | ELBO: 141.4379 | Cost: 153.4831 | KL: -120.4516
+2025-11-11 08:26:52,546 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 141.4379) 
+2025-11-11 08:27:17,783 - INFO - Epoch 41 [训练] | ELBO: 137.3024 | Cost: 149.3831 | KL: -120.8071 | BM Loss: -26.0777
+2025-11-11 08:27:19,749 - INFO - Epoch 41 [验证] | ELBO: 141.1252 | Cost: 153.1108 | KL: -119.8561
+2025-11-11 08:27:19,760 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 141.1252) 
+2025-11-11 08:27:53,371 - INFO - Epoch 42 [训练] | ELBO: 136.9831 | Cost: 149.3480 | KL: -123.6486 | BM Loss: -27.4742
+2025-11-11 08:27:55,024 - INFO - Epoch 42 [验证] | ELBO: 140.8321 | Cost: 153.0556 | KL: -122.2346
+2025-11-11 08:27:55,036 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 140.8321) 
+2025-11-11 08:28:21,673 - INFO - Epoch 43 [训练] | ELBO: 136.6739 | Cost: 149.2486 | KL: -125.7471 | BM Loss: -30.1721
+2025-11-11 08:28:23,536 - INFO - Epoch 43 [验证] | ELBO: 140.5328 | Cost: 153.1315 | KL: -125.9869
+2025-11-11 08:28:23,548 - INFO -  新的最佳模型已保存至: /home/yhshy/git_files/QVAE/data/qvae_bm/model/qvae_best_b2048_ld32_beta0.1_bm0.0001.chkpt (Valid ELBO: 140.5328) 

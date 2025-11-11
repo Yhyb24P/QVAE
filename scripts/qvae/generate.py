@@ -13,7 +13,7 @@ import sys
 import os
 import logging
 
-# --- 设置 sys.path (与 train.py 保持一致) ---
+# --- 设置 sys.path ---
 current_script_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.abspath(os.path.join(current_script_dir, '..', '..')) 
 if project_root not in sys.path:
@@ -61,13 +61,13 @@ class EncoderFC(nn.Module):
     def __init__(self, input_dim, latent_dim):
         super(EncoderFC, self).__init__()
         self.fc1 = nn.Linear(input_dim, 512)
-        self.fc_logits = nn.Linear(512, latent_dim) 
+        self.logits = nn.Linear(512, latent_dim) 
         self.relu = nn.ReLU()
         self.input_dim = input_dim
 
     def forward(self, x):
         h1 = self.relu(self.fc1(x))
-        return self.fc_logits(h1)
+        return self.logits(h1)
 
 class DecoderFC(nn.Module):
     """
@@ -93,7 +93,7 @@ def main():
     parser.add_argument('--mean_x_path', type=str, required=True, help="指向训练期间保存的 mean_x.pkl 文件的路径")
     parser.add_argument('--n_samples', type=int, default=5000, help="要生成的样本总数")
     parser.add_argument('--batch_size', type=int, default=2048, help="训练时使用的 BATCH_SIZE (用于日志和输出路径)")
-    parser.add_argument('--latent_dim', type=int, default=64, help="模型的 LATENT_DIM")
+    parser.add_argument('--latent_dim', type=int, default=32, help="模型的 LATENT_DIM")
     parser.add_argument('--beta', type=float, default=0.1, help="训练时使用的 BETA (用于日志和输出路径)")
     parser.add_argument('--decode_batch_size', type=int, default=512, help="解码时使用的批次大小")
     # --- 新增: 用于解码的温度参数 ---
@@ -209,7 +209,6 @@ def main():
         probs = F.softmax(scaled_logits.view(-1, C), dim=-1)
         
         # 3. 采样索引
-        # 增加数值稳定性, 避免 'probabilities do not sum to 1' 错误
         probs = probs.clamp(min=1e-8) 
         indices_flat = torch.multinomial(probs, num_samples=1) # (B*L, 1)
         
@@ -230,7 +229,7 @@ def main():
     for seq in sampled_seqs:
         if seq and '$' not in seq and '0' not in seq:
             count += 1
-            seq_to_check.append([f'qvae_fc_sample_{count}', seq])
+            seq_to_check.append([f'>sample{count}', seq])
 
     logging.info(f"总共生成的有效序列 (去重前): {len(seq_to_check)}")
     
@@ -245,10 +244,10 @@ def main():
     logging.info(f'序列总数 (去重后): {len(filtered_seq_to_check)}')
 
     # 定义输出路径
-    output_dir = f"data/qvae-fc/b{args.batch_size}_ld{args.latent_dim}_beta{args.beta}/output"
+    output_dir = f"data/qvae/b{args.batch_size}_ld{args.latent_dim}_beta{args.beta}/output"
     os.makedirs(output_dir, exist_ok=True)
     
-    output_fasta_path = os.path.join(output_dir, f"generated_seqs_fc_n{args.n_samples}_T{args.temperature}")
+    output_fasta_path = os.path.join(output_dir, f"generated_seqs_n{args.n_samples}_T{args.temperature}")
     
     # 写入 FASTA
     write_fasta(output_fasta_path, filtered_seq_to_check)

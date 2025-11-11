@@ -24,14 +24,11 @@ def read_fasta(name):
     return data
 
 def calculate_amino_acid_fraction(peptide):
-    """[优化] 计算单个肽的氨基酸组成百分比"""
-    # 移除了 try-except
+    """ 计算单个肽的氨基酸组成百分比"""
     prot_param = ProteinAnalysis(str(peptide))
-    # [修复] 修复 BiopythonDeprecationWarning
     return prot_param.amino_acids_percent
 
 def get_color_by_charge(amino_acid):
-    # (此函数未在脚本中使用，但保留)
     if amino_acid in ['R', 'K', 'H']:
         return 'red'  # Positive charge
     elif amino_acid in ['D', 'E']:
@@ -40,13 +37,12 @@ def get_color_by_charge(amino_acid):
         return 'gray'  # Neutral charge
 
 def validate(seq, pattern=re.compile(r'^[FIWLVMYCATHGSQRKNEPD]+$')):
-    # (此函数已被优化的 clean() 取代)
     if (pattern.match(seq)):
         return True
     return False
 
 def clean(sequence_df, pattern=re.compile(r'^[FIWLVMYCATHGSQRKNEPD]+$')):
-    """[优化] 使用矢量化操作清理 DataFrame"""
+    """ 使用矢量化操作清理 DataFrame"""
     initial_count = len(sequence_df)
     
     # 使用 str.match 进行矢量化正则表达式匹配
@@ -62,9 +58,8 @@ def clean(sequence_df, pattern=re.compile(r'^[FIWLVMYCATHGSQRKNEPD]+$')):
 
 def calculate_bio_properties(sequence):
     """
-    [优化] 辅助函数：用于 .apply()，一次性计算所有 Biopython 属性
+     辅助函数：用于 .apply()，一次性计算所有 Biopython 属性
     """
-    # 移除了 try-except
     prot_seq = ProteinAnalysis(str(sequence))
     net_charge = prot_seq.charge_at_pH(7.0)
     gravy = prot_seq.gravy()
@@ -72,8 +67,7 @@ def calculate_bio_properties(sequence):
     return net_charge, gravy, eisenberg_hydrophobicity
 
 def calculate_secondary_structure_percentages(structure):
-    """[优化] 计算二级结构百分比 (C, H, E)"""
-    # 移除了鲁棒性检查 (if not isinstance)
+    """ 计算二级结构百分比 (C, H, E)"""
         
     length = len(structure)
     if length == 0: 
@@ -100,7 +94,7 @@ def lowercase_sample(name):
 human_df = pd.DataFrame(read_fasta('data/human_tp_cd_hit_cluster'), columns = ['Name','Sequence'])
 mouse_df = pd.DataFrame(read_fasta('data/mouse_tp_cd_hit_cluster'), columns = ['Name','Sequence'])
 yeast_df = pd.DataFrame(read_fasta('data/yeast_tp_cd_hit_cluster'), columns = ['Name','Sequence'])
-amts_df = pd.DataFrame(read_fasta('scripts/qvae-v/data/qvae-fc/b2048_ld32_beta0.1/output/generated_seqs_fc_n5000_T1.0'), columns = ['Name','Sequence'])
+amts_df = pd.DataFrame(read_fasta('data/qvae/b2048_ld32_beta0.1/generated_seqs_fc_n5000_T1.0'), columns = ['Name','Sequence'])
 
 print("\nCleaning Human data...")
 human_df = clean(human_df)
@@ -109,7 +103,6 @@ mouse_df = clean(mouse_df)
 print("\nCleaning Yeast data...")
 yeast_df = clean(yeast_df)
 print("\nCleaning AMTS (generated) data...")
-# [修复] 对 AMTS 应用同样的清理
 amts_df = clean(amts_df)
 
 human_df['Label'] = 1 #'Human'
@@ -122,18 +115,18 @@ df = pd.concat([human_df, mouse_df, yeast_df, amts_df], ignore_index=True).reset
 # --- 3. Property Calculation (Optimized) ---
 
 print("\nCalculating Biopython properties (Charge, GRAVY, Eisenberg)...")
-# [优化] 使用 .apply() 代替慢速 for 循环 (Biopython)
+#  使用 .apply() 代替慢速 for 循环 (Biopython)
 bio_props_df = df['Sequence'].apply(calculate_bio_properties).apply(pd.Series)
 bio_props_df.columns = ['Net Charge', 'GRAVY', 'Eisenberg hydrophobicity']
 df = pd.concat([df, bio_props_df], axis=1)
 
 print("Calculating Amino Acid fractions...")
-# [优化] 使用 .apply() 代替慢速 for 循环 (AA Fraction)
+#  使用 .apply() 代替慢速 for 循环 (AA Fraction)
 aa_fraction_df = df['Sequence'].apply(calculate_amino_acid_fraction).apply(pd.Series)
 amino_acid_columns = aa_fraction_df.columns # 获取实际的氨基酸列名
 df = pd.concat([df, aa_fraction_df], axis=1)
 
-# 计算长度 (这已经是最高效的方式)
+# 计算长度
 df['Length'] = df['Sequence'].apply(len)
 
 
@@ -142,13 +135,11 @@ df['Length'] = df['Sequence'].apply(len)
 s4pred_filepath = "data/organism_cluster_ss.fas"
 data = {"Name": [], "Sequence": [], "Structure": []}
 
-# 移除了 try-except
 print(f"\nReading Secondary Structure file: {s4pred_filepath}")
 with open(s4pred_filepath, "r") as file:
     lines = file.readlines()
 
 for i in range(0, len(lines), 3):
-    # 移除了不完整记录检查
     protein_name = lines[i].strip()[1:]
     protein_sequence = lines[i + 1].strip()
     protein_structure = lines[i + 2].strip()
@@ -157,19 +148,15 @@ for i in range(0, len(lines), 3):
     data["Structure"].append(protein_structure)
 
 s4pred_df = pd.DataFrame(data)
-
-# 应用名称标准化
 s4pred_df['Name'] = s4pred_df['Name'].apply(lowercase_sample)
 
 # 合并
 df = df.merge(s4pred_df[['Name', 'Structure']], on='Name', how='left')
 
 print("Calculating Secondary Structure properties (s4pred)...")
-# [优化] 使用 .apply() 代替慢速 for 循环 (s4pred)
+#  使用 .apply() 代替慢速 for 循环 (s4pred)
 ss_props_df = df['Structure'].apply(calculate_secondary_structure_percentages).apply(pd.Series)
 ss_props_df.columns = ['Coil', 'Helix', 'Strand']
-
-# 在合并回 df 之前，删除可能因 .apply() 产生的旧列（如果存在）
 df = df.drop(columns=['Coil', 'Helix', 'Strand'], errors='ignore')
 df = pd.concat([df, ss_props_df], axis=1)
 
@@ -178,10 +165,10 @@ df = pd.concat([df, ss_props_df], axis=1)
 
 print("Generating plots...")
 
-# 定义标签和颜色 (更稳健的方式)
+# 定义标签和颜色 
 label_map = {1: 'Human', 2: 'Mouse', 3: 'Yeast', 4: 'AMTS'}
 color_map = {1: 'lightblue', 2: 'bisque', 3: '#A2DEA5', 4: 'mistyrose'}
-labels = [label_map[l] for l in sorted(df['Label'].unique())] # 确保顺序
+labels = [label_map[l] for l in sorted(df['Label'].unique())] 
 
 # Amino acid composition
 plt.figure(figsize=(12, 4.8))
@@ -189,7 +176,6 @@ positions = list(range(1, len(amino_acid_columns) + 1))
 gap = 0.4
 widths = 0.15
 
-# 移除了 .dropna()
 data_to_plot_1 = df[df['Label'] == 1]
 data_to_plot_2 = df[df['Label'] == 2]
 data_to_plot_3 = df[df['Label'] == 3]
@@ -210,13 +196,11 @@ plt.savefig('data/organism_aa_fraction_biopython.png', dpi = 400, bbox_inches = 
 plt.clf()
 
 # Secondary structure
-# 移除了 if 'Coil' in df.columns 检查
 plt.figure()
 positions = [1, 2, 3]
 gap = 0.2
 widths = 0.15
 
-# 移除了 .dropna()
 data_to_plot_1 = df[df['Label'] == 1]
 data_to_plot_2 = df[df['Label'] == 2]
 data_to_plot_3 = df[df['Label'] == 3]
@@ -237,21 +221,19 @@ plt.clf()
 
 # 绘制其他属性 (Length, Net Charge, GRAVY, Eisenberg)
 plot_properties = ['Length', 'Net Charge', 'GRAVY', 'Eisenberg hydrophobicity']
-plot_colors_hist = {1: '#89cff0', 2: '#faddb3', 3: '#58a365', 4: '#d4664f'} # 用于 histplot 的更深的颜色
+plot_colors_hist = {1: '#89cff0', 2: '#faddb3', 3: '#58a365', 4: '#d4664f'} 
 
 for prop in plot_properties:
     plt.figure()
     for label_id, label_name in label_map.items():
-        # 移除了 .dropna() 和 if not data.empty
         data = df[df['Label'] == label_id][prop]
-        # [修复] 使用 sns.histplot 代替 sns.distplot
         sns.histplot(data, bins=10, kde=True, stat="density",
                      label=label_name, color=plot_colors_hist[label_id], element="step")
     
     plt.xlabel(prop)
     plt.ylabel('Density')
     plt.legend()
-    plt.savefig(f'data/organism_{prop}_biopython.png', dpi = 400, bbox_inches = "tight")
+    plt.savefig(f'data/analysis/organism_{prop}_biopython.png', dpi = 400, bbox_inches = "tight")
     plt.clf()
 
 print("\n--- 脚本执行完毕 ---")

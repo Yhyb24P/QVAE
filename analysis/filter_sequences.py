@@ -36,13 +36,9 @@ if not os.path.exists(TARGETP_FILE):
     sys.exit()
 
 try:
-    targetp_df = pd.read_csv(TARGETP_FILE, sep='\t', header=1)
-    
-    # 3. 重命名第一列 (从 '# ID' 改为 'ID') 以便后续合并
+    targetp_df = pd.read_csv(TARGETP_FILE, sep='\t', header=1)    
     targetp_df.rename(columns={'# ID': 'ID'}, inplace=True)
-    # === 修改结束 ===
-    
-    print(f"成功加载 TargetP 结果: {TARGETP_FILE} (共 {len(targetp_df)} 条记录)")
+       print(f"成功加载 TargetP 结果: {TARGETP_FILE} (共 {len(targetp_df)} 条记录)")
 except Exception as e:
     print(f"读取 TargetP 文件时出错: {e}")
     sys.exit()
@@ -61,8 +57,7 @@ except Exception as e:
     sys.exit()
 
 # --- 5. 执行筛选 ---
-# (此部分现在应该可以正常工作了)
-if 'Prediction' not in targetp_df.columns or 'mTP' not in targetp_df.columns:
+f 'Prediction' not in targetp_df.columns or 'mTP' not in targetp_df.columns:
     print(f"错误: TargetP 文件 {TARGETP_FILE} 缺少 'Prediction' 或 'mTP' 列。")
     sys.exit()
 
