@@ -41,8 +41,8 @@ mpl.use('Agg')
 logging.info(f"使用设备: {device}")
 
 # --- 关键超参数  ---
-BETA = 0.1        
-LATENT_DIM = 32
+BETA = 1        
+LATENT_DIM = 64
 BATCH_SIZE = 2048
 LEARNING_RATE_VAE = 1e-4
 LEARNING_RATE_BM = 1e-4 
@@ -337,7 +337,7 @@ def main():
                 bm_loss.backward() 
                 
                 optimizer_vae.step()
-                optimizer_bm.step()
+                # optimizer_bm.step()
 
                 train_loss_elbo += neg_elbo.item()
                 train_loss_cost += cost.item()

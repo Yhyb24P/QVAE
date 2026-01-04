@@ -282,7 +282,7 @@ s4pred_files_to_load = {
     'AMTS(QVAE)': 'data/diversity_cluster_ss.fas',
     'AMTS(VAE)': 'data/diversity_cluster_ss.fas', 
     'train_data': 'data/diversity_cluster_ss.fas'
-
+}
 all_s4pred_dfs = []
 # 仅加载已加载数据集的 SS 文件
 for label in labels: 
@@ -354,7 +354,6 @@ for i, label in enumerate(label_list):
     
     data_to_plot = combined_df[combined_df['Label'] == label].dropna(subset=ss_columns)
     if data_to_plot.empty:
-        # 即使文件加载了，也可能因为名称不匹配而没有数据
         print(f"警告: 标签 '{label}' 没有有效的二级结构数据用于绘图。")
         continue
 

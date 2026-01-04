@@ -4,7 +4,9 @@
 # 2. Python缓存（全局）
 *.pyc
 *.pyo
-
+*.png
+*.csv
+*.chkpt
 # 3. 数据目录（仅忽略大文件）
 data/*.npz
 data/*.fas

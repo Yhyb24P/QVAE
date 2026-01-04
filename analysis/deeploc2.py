@@ -14,7 +14,7 @@ vae_tp = pd.read_csv('data/VAE.csv')
 logging.info(f"成功加载 Standard VAE 结果 (共 {len(vae_tp)} 条)")
 
 # 加载 β-QBM-VAE
-QVAE_CSV_PATH = 'data/rbm.csv' 
+QVAE_CSV_PATH = 'data/qvaebm.csv' 
 qvae_tp = pd.read_csv(QVAE_CSV_PATH)
 logging.info(f"成功加载 β-QBM-VAE 结果 (共 {len(qvae_tp)} 条)")
 QVAE_BM_CSV_PATH = 'data/rbm.csv' 
@@ -82,11 +82,7 @@ plt.title('Mitochondrion Probability Distribution (3-Model Comparison)', fontsiz
 plt.xlabel('Predicted Mitochondrion Probability (DeepLoc 2.0)', fontsize=12)
 plt.ylabel('Count', fontsize=12)
 plt.legend()
-<<<<<<< HEAD
 plt.savefig('data/analysis/comparison_DeepLoc_prob_distribution_VAE_vs_QVAE.png', dpi=400, bbox_inches="tight")
-=======
-plt.savefig('data/analysis/comparison_DeepLoc_prob_distribution_3_models.png', dpi=400, bbox_inches="tight") 
->>>>>>> 19398fa (保存)
 print("已保存概率分布对比图。")
 
 
@@ -117,9 +113,5 @@ plt.title('Predicted Localization Distribution (3-Model Comparison)', fontsize=1
 plt.xlabel('Localization', fontsize=12)
 plt.ylabel('Count', fontsize=12)
 plt.legend(title='Model')
-<<<<<<< HEAD
 plt.savefig('data/analysis/comparison_DeepLoc_localization_distribution_VAE_vs_QVAE.png', dpi=400, bbox_inches="tight")
 print("已保存定位分布对比图。")
-=======
-plt.savefig('data/analysis/comparison_DeepLoc_localization_distribution_3_models.png', dpi=400, bbox_inches="tight") 
->>>>>>> 19398fa (保存)

@@ -28,7 +28,7 @@ def main():
     parser.add_argument(
         "-i", "--input", 
         required=True, 
-        help="输入的FASTA文件路径 (包含您生成的MTS序列)。"
+        help="输入的FASTA文件路径 (包含>生成的MTS序列)。"
     )
     parser.add_argument(
         "-o", "--output", 
@@ -73,7 +73,7 @@ def main():
     try:
         SeqIO.write(fused_records, args.output, "fasta")
         logging.info(f"已将 {len(fused_records)} 条融合序列保存到: {args.output}")
-        logging.info("您现在可以提交此文件到 DeepLoc 2.0 (或 1.0) 进行亚细胞定位预测。")
+        logging.info(">现在可以提交此文件到 DeepLoc 2.0 (或 1.0) 进行亚细胞定位预测。")
     except Exception as e:
         logging.error(f"写入输出文件时出错: {e}")
 
