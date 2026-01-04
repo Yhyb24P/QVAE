@@ -7,6 +7,7 @@
 *.png
 *.csv
 *.chkpt
+*.txt
 # 3. 数据目录（仅忽略大文件）
 data/*.npz
 data/*.fas

@@ -93,7 +93,7 @@ def main():
     parser.add_argument('--mean_x_path', type=str, required=True, help="指向训练期间保存的 mean_x.pkl 文件的路径")
     parser.add_argument('--n_samples', type=int, default=5000, help="要生成的样本总数")
     parser.add_argument('--batch_size', type=int, default=2048, help="训练时使用的 BATCH_SIZE (用于日志和输出路径)")
-    parser.add_argument('--latent_dim', type=int, default=32, help="模型的 LATENT_DIM")
+    parser.add_argument('--latent_dim', type=int, default=64, help="模型的 LATENT_DIM")
     parser.add_argument('--beta', type=float, default=0.1, help="训练时使用的 BETA (用于日志和输出路径)")
     parser.add_argument('--decode_batch_size', type=int, default=512, help="解码时使用的批次大小")
     # --- 新增: 用于解码的温度参数 ---
