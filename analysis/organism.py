@@ -94,7 +94,7 @@ def lowercase_sample(name):
 human_df = pd.DataFrame(read_fasta('data/human_tp_cd_hit_cluster'), columns = ['Name','Sequence'])
 mouse_df = pd.DataFrame(read_fasta('data/mouse_tp_cd_hit_cluster'), columns = ['Name','Sequence'])
 yeast_df = pd.DataFrame(read_fasta('data/yeast_tp_cd_hit_cluster'), columns = ['Name','Sequence'])
-amts_df = pd.DataFrame(read_fasta('data/qvae/b2048_ld32_beta0.1/generated_seqs_fc_n5000_T1.0'), columns = ['Name','Sequence'])
+amts_df = pd.DataFrame(read_fasta('data/qvae_bm/b2048_ld32_beta0.1/output/generated_seqs_n5000_T1.0'), columns = ['Name','Sequence'])
 
 print("\nCleaning Human data...")
 human_df = clean(human_df)
@@ -233,7 +233,7 @@ for prop in plot_properties:
     plt.xlabel(prop)
     plt.ylabel('Density')
     plt.legend()
-    plt.savefig(f'data/analysis/organism_{prop}_biopython.png', dpi = 400, bbox_inches = "tight")
+    plt.savefig(f'ddata/qvae_bm/b2048_ld32_beta0.1/output/organism_{prop}_biopython.png', dpi = 400, bbox_inches = "tight")
     plt.clf()
 
 print("\n--- 脚本执行完毕 ---")

@@ -117,14 +117,14 @@ print(f"聚类中心计算完毕。 Shape: {cluster_center.shape}") # 应为 (4,
 # --- 4. 加载 AMTS 序列  ---
 
 
-in_fasta = 'data/qvae_bm/b2048_ld32_beta0.1/generated_seqs_fc_n5000_T1.0' 
+in_fasta = 'data/qvae_bm/b2048_ld32_beta0.1/output/generated_seqs_n5000_T1.0_GFP' 
 ini_amts_df = pd.DataFrame(read_fasta(in_fasta), columns = ['name', 'sequence'])
 
 # 同样过滤，只保留 'M' 开头的序列
 amts_df = ini_amts_df[ini_amts_df.sequence.str.startswith('M')]
 
 # 加载人工序列的预计算嵌入
-arrays = np.load('data/qvae_bm/b2048_ld32_beta0.1/generated_seqs_fc_n5000_T1.0' + '.npz', allow_pickle=True) 
+arrays = np.load('data/qvae_bm/b2048_ld32_beta0.1/output/generated_seqs_n5000_T1.0_GFP' + '.npz', allow_pickle=True) 
 embd_for_amts = []
 amts_data_embd_arranged = []
 for i in list(arrays.keys()):
@@ -265,7 +265,7 @@ plt.tight_layout()
 # --- 新增：绘制人工序列 (END) ---
 
 # 保存图像 
-output_filename = 'data/qvae_bm/output/聚类分析.jpg'
+output_filename = 'data/qvae_bm/b2048_ld32_beta0.1/output/聚类分析.jpg'
 plt.savefig(output_filename, dpi=400, bbox_inches='tight') 
 print(f"已保存包含人工序列的图像到: {output_filename}")
 
@@ -286,5 +286,5 @@ for i in range(np.shape(amts_data_embd_arranged_cf)[0]):
 amts_data_embd_arranged_cf['org_label'] = org_label
 
 # 将最终结果保存为 CSV 文件
-amts_data_embd_arranged_cf.to_csv('data/qvae_bm/output/聚类分析表.csv',index=False)
+amts_data_embd_arranged_cf.to_csv('data/qvae_bm/b2048_ld32_beta0.1/output/聚类分析表.csv',index=False)
 print("已保存带标签的人工序列 CSV。")

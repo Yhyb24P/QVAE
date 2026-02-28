@@ -2,225 +2,231 @@ import pandas as pd
 import numpy as np
 import re
 from Bio import SeqIO
-# from Bio import pairwise2 as pw2 # 未使用，已注释
 import seaborn as sns
 import matplotlib.pyplot as plt
 from Levenshtein import distance as lv
 from tqdm import tqdm
-import pickle # <--- 在这里添加缺失的导入
-
-# --- 导入并行处理库 ---
+import pickle
 import multiprocessing
 from functools import partial
-import time # 用于计时
+import time
+import os
 
 # --- 1. Functions (Optimized) ---
 
 def validate(seq, pattern=re.compile(r'^[FIWLVMYCATHGSQRKNEPD]+$')):
-    """使用预编译的 regex 验证序列"""
+    """验证序列是否仅包含标准氨基酸"""
     if (pattern.match(seq)):
         return True
     return False
 
 def clean(sequence_df):
-    """
-    使用 Pandas 矢量化操作 (str.match) 优化 clean 函数
-    """
+    """清理非标准序列"""
     print(f"Cleaning sequences... Initial count: {len(sequence_df)}")
-    
-    # 矢量化操作：检查 'sequence' 列中的每个字符串是否匹配
     valid_mask = sequence_df['sequence'].str.match(r'^[FIWLVMYCATHGSQRKNEPD]+$').fillna(False)
-    
-    invalid_count = len(sequence_df) - valid_mask.sum()
-    print(f'Total number of sequences dropped: {invalid_count}')
-    
-    # 按掩码过滤并重置索引
     cleaned_df = sequence_df[valid_mask].reset_index(drop=True)
     print(f'Total number of sequences remaining: {len(cleaned_df)}')
-    
     return cleaned_df
 
 def read_fasta(name):
-    """读取 FASTA 文件并移除 eGFP 序列"""
-    print(f"Reading FASTA file: {name}.fasta")
-    fasta_seqs = SeqIO.parse(open(name + '.fasta'),'fasta')
+    """读取 FASTA 文件"""
+    # 自动处理是否有 .fasta 后缀
+    if not name.endswith('.fasta'):
+        filepath = name + '.fasta'
+    else:
+        filepath = name
+        
+    print(f"Reading FASTA file: {filepath}")
+    if not os.path.exists(filepath):
+        print(f"Error: File not found: {filepath}")
+        return []
+
     data = []
-    # eGFP 序列保持不变
+    # eGFP 序列 (用于移除)
     egfp = 'VSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTLVTTLTYGVQCFSRYPDHMKQHDFFKSAMPEGYVQERTIFFKDDGNYKTRAEVKFEGDTLVNRIELKGIDFKEDGNILGHKLEYNYNSHNVYIMADKQKNGIKVNFKIRHNIEDGSVQLADHYQQNTPIGDGPVLLPDNHYLSTQSALSKDPNEKRDHMVLLEFVTAAGITLGMDELYK'
     
-    count = 0
-    for fasta in fasta_seqs:
-        count += 1
-        # 清理序列中的空格和 eGFP
-        seq_cleaned = str(fasta.seq).strip().replace(egfp,'')
-        data.append([fasta.id, seq_cleaned])
+    try:
+        fasta_seqs = SeqIO.parse(open(filepath),'fasta')
+        for fasta in fasta_seqs:
+            seq_cleaned = str(fasta.seq).strip().replace(egfp,'')
+            data.append([fasta.id, seq_cleaned])
+    except Exception as e:
+        print(f"Error reading FASTA: {e}")
+        return []
     
-    print(f"Read {count} sequences from FASTA.")
+    print(f"Read {len(data)} sequences from FASTA.")
     return data
 
 def parse_uniprot_row(row):
     """
-    用于 .apply() 的辅助函数，解析 UniProt excel 的单行。
-    使用 try-except 增加鲁棒性。
+    解析 UniProt Excel 行。
+    假设列结构: [0]Entry, [1]Entry Name, [2]Sequence, [3]Features
     """
     try:
-        col_name, col_seq, col_features = row[0], row[2], row[3]
+        # 注意：这里假设列索引为 0, 2, 3。如果 Excel 结构不同，需要修改这里
+        col_name = row[0]
+        col_seq = row[2]
+        col_features = str(row[3]) # 确保转为字符串
         
-        # 过滤：寻找 'Mitochondrion' (不区分大小写)
         if 'mitochondrion' not in col_features.lower():
             return None
         
-        # 提取 'note=' (不区分大小写)
-        note_match = re.search(r'note="([^"]+)"', col_features, re.IGNORECASE)
-        if not note_match:
-            return None
-            
-        organelle = note_match.group(1)
-        if 'mitochondrion' not in organelle.lower():
-             return None
-
-        # 提取 'Transit peptide' 范围 (不区分大小写)
-        tp_match = re.search(r'transit peptide\s+\d+\.\.(\d+)', col_features, re.IGNORECASE)
-        if not tp_match:
-            return None
-
-        tp_end_str = tp_match.group(1)
+        # 提取 Transit peptide 位置
+        # --- 修复更新: 兼容 'TRANSIT 1..97' 和 'Transit peptide 1..97' ---
+        # 正则解释:
+        # transit          匹配 "transit" (忽略大小写)
+        # (?:\s+peptide)?  可选匹配 " peptide" (忽略大小写)
+        # \s+              匹配空格
+        # \d+\.\.          匹配 "数字.." (起始位置)
+        # (\d+)            捕获组 1: 结束位置
+        tp_match = re.search(r'transit(?:\s+peptide)?\s+\d+\.\.(\d+)', col_features, re.IGNORECASE)
         
-        # 确保 tp_end 是有效数字
-        if '?' in tp_end_str:
+        # 如果第一种正则失败，尝试更宽松的匹配（针对某些包含非标准字符的情况）
+        if not tp_match:
+             # 备用方案
+             tp_match = re.search(r'transit.*?\.\.(\d+)', col_features, re.IGNORECASE)
+        
+        if tp_match:
+            tp_end = int(tp_match.group(1))
+        else:
+            return None
+
+        if tp_end <= 5: 
             return None
             
-        tp_end = int(tp_end_str)
-        if tp_end <= 5: # 过滤长度
-            return None
-            
-        # 提取序列
         tp_seq = col_seq[:tp_end]
         
-        # 验证序列字符
         if not validate(tp_seq):
             return None
             
         return [col_name, tp_seq]
         
     except Exception as e:
-        # 捕获解析错误
-        # print(f"Skipping row due to error: {e}")
         return None
 
 def find_min_distance(query_seq, target_sequences):
-    """
-    计算单个 query_seq 与 target_sequences 列表中所有序列的最小 Levenshtein 距离。
-    这是用于并行化的工作单元。
-    """
-    if not query_seq: # 处理空字符串
-        return np.inf
-        
+    """计算最小编辑距离"""
+    if not query_seq: return np.inf
     min_dist = np.inf
     for target_seq in target_sequences:
-        if not target_seq: # 跳过空的目标
-            continue
         dist = lv(query_seq, target_seq)
         if dist < min_dist:
             min_dist = dist
     return min_dist
 
-
 # --- 2. Main Execution ---
 
-print("--- 启动序列相似性分析 ---")
-start_time = time.time()
+if __name__ == '__main__':
+    print("--- 启动序列相似性分析 ---")
+    start_time = time.time()
 
-# --- UniProt 数据处理 (Optimized) ---
-print("Loading and parsing UniProt data...")
-uniprot_raw = pd.read_excel('data/uniprot_transit_peptide.xlsx', header = None) 
-
-# 使用 .apply() 代替慢速循环
-# 我们跳过标题行 (index 0)
-parsed_data = uniprot_raw.iloc[1:].apply(parse_uniprot_row, axis=1).dropna().tolist()
-
-uniprot_tp = pd.DataFrame(parsed_data, columns = ['name', 'sequence'])
-print(f'Total valid sequences parsed: {len(uniprot_tp)}')
-
-# 删除重复项
-uniprot_tp = uniprot_tp.drop_duplicates(subset='sequence').reset_index(drop=True)
-print(f'Total sequences remaining after duplicate removal: {len(uniprot_tp)}')
-
-# --- VAE 和 训练数据 加载 ---
-print("Loading VAE generated sequences...")
-# --- 修改下面这一行 ---
-vae_tp = pd.DataFrame(read_fasta('data/qvae/b2048_ld32_beta0.1/output/generated_seqs_n5000_T1.0'), columns = ['name','sequence'])
-# --- 修改上面这一行 ---
-
-# 可选：清理 VAE 序列
-vae_tp = clean(vae_tp) 
-
-print("Loading training data (X_train)...")
-with open('data/tv_sim_split_train.pkl', 'rb') as f:
-    X_train = pickle.load(f)
-
-# --- 3. 并行计算 Levenshtein 距离 ---
-query_vae_seqs = vae_tp['sequence'].tolist()
-target_uniprot_seqs = uniprot_tp['sequence'].tolist()
-target_train_seqs = X_train['sequence'].tolist()
-
-num_queries = len(query_vae_seqs)
-print(f"Starting parallel distance calculation for {num_queries} query sequences...")
-
-# 获取 CPU 核心数
-n_cores = multiprocessing.cpu_count()
-print(f"Using {n_cores} CPU cores for parallel processing.")
-
-min_lev_h = []
-min_lev = []
-
-# 使用 multiprocessing.Pool
-with multiprocessing.Pool(processes=n_cores) as pool:
+    # --- UniProt 数据处理 ---
+    print("Loading and parsing UniProt data...")
+    uniprot_file = 'data/uniprot_transit_peptide.xlsx'
     
-    # --- 任务 1: VAE vs UniProt ---
-    print(f"Calculating distances to {len(target_uniprot_seqs)} UniProt sequences...")
-    # 使用 partial 锁定 'target_sequences' 参数
-    task_h = partial(find_min_distance, target_sequences=target_uniprot_seqs)
+    if os.path.exists(uniprot_file):
+        # 读取 Excel
+        uniprot_raw = pd.read_excel(uniprot_file, header=None)
+        
+        # --- DEBUG: 打印 Excel 结构以供检查 ---
+        print(f"  [DEBUG] Excel Shape: {uniprot_raw.shape}")
+        # print(f"  [DEBUG] Row 0 (Header?): {uniprot_raw.iloc[0].tolist()}")
+        # print(f"  [DEBUG] Row 1 (Data?):   {uniprot_raw.iloc[1].tolist()}")
+        # ------------------------------------
+
+        # 解析数据
+        parsed_data = uniprot_raw.iloc[1:].apply(parse_uniprot_row, axis=1).dropna().tolist()
+        uniprot_tp = pd.DataFrame(parsed_data, columns = ['name', 'sequence'])
+        
+        print(f'Total valid sequences parsed: {len(uniprot_tp)}')
+        
+        if len(uniprot_tp) > 0:
+            uniprot_tp = uniprot_tp.drop_duplicates(subset='sequence').reset_index(drop=True)
+            print(f'Total sequences remaining after duplicate removal: {len(uniprot_tp)}')
+        else:
+            print("⚠️ 警告: 未能解析出任何 UniProt 序列。请检查上方的 [DEBUG] 信息和 Excel 列结构。")
+    else:
+        print(f"Error: UniProt file not found: {uniprot_file}")
+        uniprot_tp = pd.DataFrame(columns=['name', 'sequence'])
+
+    # --- VAE 和 训练数据 加载 ---
+    print("Loading VAE generated sequences...")
+    # 更新为您日志中的路径 (ld32)
+    vae_seq_path = 'data/vae/output/amts'
+    vae_tp = pd.DataFrame(read_fasta(vae_seq_path), columns = ['name','sequence'])
     
-    # pool.imap 允许 tqdm 显示进度条
-    min_lev_h = list(tqdm(
-        pool.imap(task_h, query_vae_seqs), 
-        total=num_queries, 
-        desc="VAE vs UniProt"
-    ))
+    if vae_tp.empty:
+        print("Error: No VAE sequences loaded. Exiting.")
+        exit()
 
-    # --- 任务 2: VAE vs Training Data ---
-    print(f"Calculating distances to {len(target_train_seqs)} Training sequences...")
-    task_train = partial(find_min_distance, target_sequences=target_train_seqs)
+    print("Loading training data (X_train)...")
+    try:
+        with open('data/tv_sim_split_train.pkl', 'rb') as f:
+            X_train = pickle.load(f)
+    except Exception as e:
+        print(f"Error loading pickle: {e}")
+        X_train = pd.DataFrame(columns=['sequence'])
+
+    # --- 3. 并行计算 Levenshtein 距离 ---
+    query_vae_seqs = vae_tp['sequence'].tolist()
+    target_uniprot_seqs = uniprot_tp['sequence'].tolist()
+    target_train_seqs = X_train['sequence'].tolist()
+
+    num_queries = len(query_vae_seqs)
+    print(f"Starting parallel distance calculation for {num_queries} query sequences...")
+
+    n_cores = multiprocessing.cpu_count()
+    print(f"Using {n_cores} CPU cores for parallel processing.")
+
+    min_lev_h = []
+    min_lev = []
+
+    with multiprocessing.Pool(processes=n_cores) as pool:
+        
+        # --- 任务 1: VAE vs UniProt ---
+        if len(target_uniprot_seqs) > 0:
+            print(f"Calculating distances to {len(target_uniprot_seqs)} UniProt sequences...")
+            task_h = partial(find_min_distance, target_sequences=target_uniprot_seqs)
+            min_lev_h = list(tqdm(pool.imap(task_h, query_vae_seqs), total=num_queries, desc="VAE vs UniProt"))
+        else:
+            print("Skipping UniProt distance calculation (No data).")
+
+        # --- 任务 2: VAE vs Training Data ---
+        if len(target_train_seqs) > 0:
+            print(f"Calculating distances to {len(target_train_seqs)} Training sequences...")
+            task_train = partial(find_min_distance, target_sequences=target_train_seqs)
+            min_lev = list(tqdm(pool.imap(task_train, query_vae_seqs), total=num_queries, desc="VAE vs Training"))
+
+    print("Distance calculations complete.")
+
+    # --- 4. 绘图 (Safe Plotting) ---
+    print("Generating plot...")
+    plt.figure(figsize=(9, 6))
+    plt.xticks(fontsize=18)
+    plt.yticks(fontsize=18)
+
+    # 绘制 Length
+    vae_tp_len = list(vae_tp['sequence'].str.len())
+    sns.histplot(vae_tp_len, kde=True, label='Length', stat="density", element="step")
+
+    # 绘制 Distance to Training
+    if len(min_lev) > 0:
+        sns.histplot(min_lev, kde=True, label='Distance to training data', stat="density", element="step")
     
-    min_lev = list(tqdm(
-        pool.imap(task_train, query_vae_seqs), 
-        total=num_queries, 
-        desc="VAE vs Training"
-    ))
+    # 绘制 Distance to UniProt (仅当有数据时)
+    if len(min_lev_h) > 0:
+        sns.histplot(min_lev_h, kde=True, label='Distance to MTSs in UniProt', stat="density", element="step")
+    else:
+        print("⚠️ 跳过绘制 'Distance to MTSs in UniProt'，因为数据为空。")
 
-print("Distance calculations complete.")
+    plt.legend(fontsize=12)
+    
+    # 确保输出目录存在
+    output_dir = os.path.dirname(vae_seq_path)
+    save_path = os.path.join(output_dir, 'Edit_Distance_Optimized.png')
+    
+    plt.savefig(save_path, dpi=400, bbox_inches="tight")
+    print(f"Plot saved to {save_path}")
 
-# --- 4. 绘图 (Optimized) ---
-print("Generating plot...")
-vae_tp_len = list(vae_tp['sequence'].str.len())
-
-plt.figure(figsize=(9, 6))
-plt.xticks(fontsize=18)
-plt.yticks(fontsize=18)
-
-# --- 使用 sns.histplot ---
-sns.histplot(vae_tp_len, kde=True, label='Length', stat="density", element="step")
-sns.histplot(min_lev, kde=True, label='Distance to training data', stat="density", element="step")
-sns.histplot(min_lev_h, kde=True, label='Distance to MTSs in UniProt', stat="density", element="step")
-
-plt.legend(fontsize=12)
-save_path = 'data/analysis/Edit_Distance_Optimized.png'
-plt.savefig(save_path, dpi=400, bbox_inches="tight")
-print(f"Plot saved to {save_path}")
-
-end_time = time.time()
-print(f"--- 脚本总运行时间: {end_time - start_time:.2f} 秒 ---")
-
-
-
+    end_time = time.time()
+    print(f"--- 脚本总运行时间: {end_time - start_time:.2f} 秒 ---")

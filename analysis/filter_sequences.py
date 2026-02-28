@@ -21,11 +21,11 @@ def write_fasta(name, sequence_df):
 MIN_MTP_PROBABILITY = 0.8  # 筛选 mTP 概率 > 80% 的序列
 
 # --- 2. 定义文件路径 ---
-TARGETP_FILE = 'data/output_protein_type.txt'
+TARGETP_FILE = 'data/qvae_bm/b2048_ld32_beta0.1/output/output_protein_type.txt'
 
 # 这个 CSV 文件是由 sample.py 生成的，包含了完整的 MTS-GFP 序列
-SEQUENCES_FILE = '聚类分析表.csv'
-OUTPUT_FILE_NAME = f'data/final_successful_candidates_mTP_gt_{int(MIN_MTP_PROBABILITY*100)}'
+SEQUENCES_FILE = 'data/qvae_bm/b2048_ld32_beta0.1/output/聚类分析表.csv'
+OUTPUT_FILE_NAME = f'data/qvae_bm/b2048_ld32_beta0.1/output/final_successful_candidates_mTP_gt_{int(MIN_MTP_PROBABILITY*100)}'
 
 print(f"开始筛选。目标：找到 TargetP 预测为 'mTP' 且概率 > {MIN_MTP_PROBABILITY} 的序列。")
 
@@ -38,7 +38,7 @@ if not os.path.exists(TARGETP_FILE):
 try:
     targetp_df = pd.read_csv(TARGETP_FILE, sep='\t', header=1)    
     targetp_df.rename(columns={'# ID': 'ID'}, inplace=True)
-       print(f"成功加载 TargetP 结果: {TARGETP_FILE} (共 {len(targetp_df)} 条记录)")
+    print(f"成功加载 TargetP 结果: {TARGETP_FILE} (共 {len(targetp_df)} 条记录)")
 except Exception as e:
     print(f"读取 TargetP 文件时出错: {e}")
     sys.exit()
@@ -57,7 +57,7 @@ except Exception as e:
     sys.exit()
 
 # --- 5. 执行筛选 ---
-f 'Prediction' not in targetp_df.columns or 'mTP' not in targetp_df.columns:
+if 'Prediction' not in targetp_df.columns or 'mTP' not in targetp_df.columns:
     print(f"错误: TargetP 文件 {TARGETP_FILE} 缺少 'Prediction' 或 'mTP' 列。")
     sys.exit()
 

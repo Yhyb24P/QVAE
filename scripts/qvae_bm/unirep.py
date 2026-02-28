@@ -25,14 +25,9 @@ def simple_fasta_reader(fasta_file):
         sys.exit(1)
 
 # --- 2. 定义输入和输出文件路径 ---
-<<<<<<< HEAD:scripts/qvae-bm/unirep.py
-INPUT_FASTA = 'data/qvae_bm/output/b2048_ld32_beta0.1/output/generated_seqs_n5000_T1.0.fasta' 
-
-OUTPUT_NPZ = 'data/qvae_bm/output/b2048_ld32_beta0.1/output/generated_seqs_n5000_T1.0.npz' 
-=======
 INPUT_FASTA = 'data/qvae_bm/b2048_ld32_beta0.1/output/generated_seqs_n5000_T1.0_GFP.fasta' 
+
 OUTPUT_NPZ = 'data/qvae_bm/b2048_ld32_beta0.1/output/generated_seqs_n5000_T1.0_GFP.npz' 
->>>>>>> 19398fa (保存):scripts/qvae_bm/unirep.py
 
 # --- 3. 加载序列 ---
 print(f"正在从 {INPUT_FASTA} 加载序列...")
